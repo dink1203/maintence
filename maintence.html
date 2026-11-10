@@ -1,0 +1,59 @@
+export default {
+  async fetch(request, env, ctx) {
+    try {
+      // Mencoba mengambil data asli dari server host Anda
+      const response = await fetch(request);
+
+      // Daftar kode error server yang ingin Anda tangkap
+      const errorStatuses = [500, 502, 503, 504, 521, 522, 523, 524];
+
+      if (errorStatuses.includes(response.status)) {
+        return namaHalamanMaintenance();
+      }
+
+      return response;
+    } catch (err) {
+      // Jika server benar-benar mati/down total dan tidak merespons
+      return namaHalamanMaintenance();
+    }
+  }
+};
+
+// Fungsi yang mengembalikan tampilan HTML Maintenance kustom Anda
+function namaHalamanMaintenance() {
+  const html = `
+  <!DOCTYPE html>
+  <html lang="id">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Situs Sedang Pemeliharaan</title>
+      <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 150px; background-color: #f4f4f4; color: #333; }
+          h1 { font-size: 50px; }
+          body { font: 20px Helvetica, sans-serif; color: #333; }
+          article { display: block; text-align: left; width: 650px; margin: 0 auto; }
+          a { color: #dc8100; text-decoration: none; }
+          a:hover { color: #333; text-decoration: underline; }
+      </style>
+  </head>
+  <body>
+  <article>
+      <h1>Kami akan segera kembali!</h1>
+      <div>
+          <p>Maaf atas ketidaknyamanannya, server kami sedang mengalami gangguan teknis atau dalam pemeliharaan terjadwal.</p>
+          <p>&mdash; Tim Teknisi</p>
+      </div>
+  </article>
+  </body>
+  </html>
+  `;
+
+  return new Response(html, {
+    status: 503, // Mengembalikan status 503 Service Unavailable demi SEO
+    headers: {
+      'content-type': 'text/html;charset=UTF-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' // Mencegah browser menyimpan cache halaman error
+    },
+  });
+}
